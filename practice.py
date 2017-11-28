@@ -29,21 +29,13 @@ class Subreddit(object):
 		for post in json.loads(html)['data']['children']:
 			yield post['data'][key]
 
-# async def subreddit(session, name, key = 'title', limit = 10):
-# 	"""
-# 	Returns posts
-# 	title = Post titles
-# 	"""
-# 	url = "https://www.reddit.com/r/{0}/.json?limit={1}".format(name, limit)
-# 	html = await fetch(session, url)
-# 	for post in json.loads(html)['data']['children']: # Will always want to go into data children. 
-# 		yield post['data'][key]
-
 async def main(name, key = 'title', limit = 25):
 	s = Subreddit(name)
 	async with aiohttp.ClientSession() as session:
 		async for post in s.subreddit(session, key, limit):
 			print("* " + post)
+
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main(name = 'overwatch', limit = 5))
