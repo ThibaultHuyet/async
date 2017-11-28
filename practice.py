@@ -10,26 +10,40 @@ async def fetch(session, url):
         async with session.get(url) as response:
             return await response.text()
 
-async def subreddit(session, name):
+class Subreddit(object):
 	"""
-	Returns posts
+	x = Subreddit('chapotraphouse')
+	x.subreddit('title', limit = '10')
+
+	>>> post 1
+	>>> post 2
+	>>> ...
+	>>> post 10
 	"""
-	url = "https://www.reddit.com/r/{0}/.json".format(name)
-	html = await fetch(session, url)
-	for post in json.loads(html)['data']['children']:
-		yield post['data']['title']
+	def __init__(self, sub):
+		self.sub = sub
 
+	async def subreddit(self, session, key = 'title', limit = 25):
+		url = "https://www.reddit.com/r/{0}/.json?limit={1}".format(self.sub, limit)
+		html = await fetch(session, url)
+		for post in json.loads(html)['data']['children']:
+			yield post['data'][key]
 
-async def main():
-    async with aiohttp.ClientSession() as session:
-        html = await fetch(session, 'https://www.reddit.com/r/overwatch/.json')
-        for post in json.loads(html)['data']['children']:
-        	print(post['data']['title'])
+# async def subreddit(session, name, key = 'title', limit = 10):
+# 	"""
+# 	Returns posts
+# 	title = Post titles
+# 	"""
+# 	url = "https://www.reddit.com/r/{0}/.json?limit={1}".format(name, limit)
+# 	html = await fetch(session, url)
+# 	for post in json.loads(html)['data']['children']: # Will always want to go into data children. 
+# 		yield post['data'][key]
 
-async def main2():
+async def main(name, key = 'title', limit = 25):
+	s = Subreddit(name)
 	async with aiohttp.ClientSession() as session:
-		async for post in subreddit(session, 'overwatch'):
-			print(post)
+		async for post in s.subreddit(session, key, limit):
+			print("* " + post)
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(main2())
+loop.run_until_complete(main(name = 'overwatch', limit = 5))
