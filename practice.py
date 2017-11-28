@@ -12,22 +12,23 @@ async def fetch(session, url):
 
 class Subreddit(object):
 	"""
-	x = Subreddit('chapotraphouse')
-	x.subreddit('title', limit = '10')
+	>>> x = Subreddit('chapotraphouse')
+	>>> x.subreddit('title', limit = '10')
 
-	>>> post 1
-	>>> post 2
-	>>> ...
-	>>> post 10
+	post 1
+	post 2
+	...
+	post 10
 	"""
 	def __init__(self, sub):
 		self.sub = sub
 
-	async def subreddit(self, session, key = 'title', limit = 25):
+	async def subreddit(self, session, key = 'title', limit = 25, stickied = False):
 		url = "https://www.reddit.com/r/{0}/.json?limit={1}".format(self.sub, limit)
 		html = await fetch(session, url)
 		for post in json.loads(html)['data']['children']:
-			yield post['data'][key]
+			if post['data']['stickied'] == stickied:
+				yield post['data'][key]
 
 async def main(name, key = 'title', limit = 25):
 	s = Subreddit(name)
